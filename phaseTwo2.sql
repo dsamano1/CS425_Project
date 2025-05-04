@@ -81,6 +81,8 @@ CREATE TABLE booking (
    renter_email   VARCHAR(255) NOT NULL,
    card_number    VARCHAR(20)  NOT NULL,
    property_id    INTEGER      NOT NULL,
+   start_date     DATE         NOT NULL,
+   end_date       DATE         NOT NULL,
    FOREIGN KEY (renter_email) REFERENCES prospective_renter(email_address),
    FOREIGN KEY (card_number)  REFERENCES credit_card(card_number),
    FOREIGN KEY (property_id)  REFERENCES property(property_id)

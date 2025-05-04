@@ -12,6 +12,7 @@ public class Main {
             UserService userService = new UserService();
             PaymentService paymentService = new PaymentService();
             PropertyService propertyService = new PropertyService();
+            BookingService bookingService = new BookingService();
 
             while (true) {
                 System.out.println("\n=== Real Estate CLI ===");
@@ -25,6 +26,11 @@ public class Main {
                 System.out.println("8. Modify property (agents only)");
                 System.out.println("9. Update address (renters only)");
                 System.out.println("10. Update credit card (renters only)");
+                System.out.println("11. Book a property (renters only)");
+                System.out.println("12. View my bookings (renters only)");
+                System.out.println("13. Cancel a booking (renters only)");
+                System.out.println("14. View bookings for my properties (agents only)");
+                System.out.println("15. Cancel a booking for my property (agents only)");
                 System.out.println("0. Exit");
                 System.out.print("Choose option: ");
 
@@ -172,6 +178,60 @@ public class Main {
                             stmt.executeUpdate();
                         }
                         System.out.println("Credit card updated.");
+                    }
+
+                    case 11 -> {
+                        System.out.print("Email: ");
+                        String email11 = scanner.nextLine();
+                        if (!isRenter(conn, email11)) {
+                            System.out.println("Only renters can book properties.");
+                            break;
+                        }
+                        bookingService.bookProperty(conn, scanner, email11);
+                    }
+
+                    case 12 -> {
+                        System.out.print("Email: ");
+                        String email12 = scanner.nextLine();
+                        if (!isRenter(conn, email12)) {
+                            System.out.println("Only renters can view their bookings.");
+                            break;
+                        }
+                        bookingService.viewBookingsForRenter(conn, email12);
+                    }
+
+                    case 13 -> {
+                        System.out.print("Email: ");
+                        String email13 = scanner.nextLine();
+                        if (!isRenter(conn, email13)) {
+                            System.out.println("Only renters can cancel bookings.");
+                            break;
+                        }
+                        System.out.print("Booking ID: ");
+                        int bookingId13 = Integer.parseInt(scanner.nextLine());
+                        bookingService.cancelBookingByRenter(conn, email13, bookingId13);
+                    }
+
+                    case 14 -> {
+                        System.out.print("Email: ");
+                        String email14 = scanner.nextLine();
+                        if (!isAgent(conn, email14)) {
+                            System.out.println("Only agents can view bookings for their properties.");
+                            break;
+                        }
+                        bookingService.viewBookingsForAgent(conn, email14);
+                    }
+
+                    case 15 -> {
+                        System.out.print("Email: ");
+                        String email15 = scanner.nextLine();
+                        if (!isAgent(conn, email15)) {
+                            System.out.println("Only agents can cancel bookings for their properties.");
+                            break;
+                        }
+                        System.out.print("Booking ID: ");
+                        int bookingId15 = Integer.parseInt(scanner.nextLine());
+                        bookingService.cancelBookingByAgent(conn, email15, bookingId15);
                     }
 
                     case 0 -> {
