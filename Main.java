@@ -3,8 +3,8 @@ import java.util.Scanner;
 
 public class Main {
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/mydb";
-    private static final String DB_USER = "user1";
-    private static final String DB_PASS = "pwd";
+    private static final String DB_USER = "postgres";
+    private static final String DB_PASS = "401172";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
