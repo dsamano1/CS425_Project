@@ -55,4 +55,56 @@ public class PropertyService {
 
         System.out.println("✅ Property updated.");
     }
+
+    public void searchProperties(Connection conn, String city, String state, Double minPrice, Double maxPrice, String type, Integer bedrooms, String orderBy) throws SQLException {
+        StringBuilder query = new StringBuilder("SELECT * FROM property WHERE 1=1");
+
+        if (city != null && !city.isEmpty()) {
+            query.append(" AND LOWER(city) = LOWER(?)");
+        }
+        if (state != null && !state.isEmpty()) {
+            query.append(" AND LOWER(state) = LOWER(?)");
+        }
+        if (minPrice != null) {
+            query.append(" AND price >= ?");
+        }
+        if (maxPrice != null) {
+            query.append(" AND price <= ?");
+        }
+        if (type != null && !type.isEmpty()) {
+            query.append(" AND LOWER(type) = LOWER(?)");
+        }
+        if ("price".equals(orderBy)) {
+            query.append(" ORDER BY price ASC");
+        } else if ("bedrooms".equals(orderBy)) {
+            query.append(" ORDER BY bedrooms ASC");
+        }
+
+        PreparedStatement stmt = conn.prepareStatement(query.toString());
+
+        int i = 1;
+        if (city != null && !city.isEmpty()) stmt.setString(i++, city);
+        if (state != null && !state.isEmpty()) stmt.setString(i++, state);
+        if (minPrice != null) stmt.setDouble(i++, minPrice);
+        if (maxPrice != null) stmt.setDouble(i++, maxPrice);
+        if (type != null && !type.isEmpty()) stmt.setString(i++, type);
+
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            int id = rs.getInt("property_id");  
+            String t = rs.getString("type");
+            double sqft = rs.getDouble("square_footage");
+            String addr = rs.getString("address");
+            String c = rs.getString("city");
+            String s = rs.getString("state");
+            double price = rs.getDouble("price");
+            String desc = rs.getString("description");
+
+            System.out.printf("🏠 ID: %d | %s | %.0f sqft | $%.2f | %s, %s | %s | %s\n",
+                            id, t, sqft, price, addr, c, s, desc);
+        }
+        System.out.println("✅ Property search completed.");
+
+    }
 }

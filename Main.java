@@ -31,6 +31,7 @@ public class Main {
                 System.out.println("13. Cancel a booking (renters only)");
                 System.out.println("14. View bookings for my properties (agents only)");
                 System.out.println("15. Cancel a booking for my property (agents only)");
+                System.out.println("16. Search properties (renters and agents)");
                 System.out.println("0. Exit");
                 System.out.print("Choose option: ");
 
@@ -232,6 +233,32 @@ public class Main {
                         System.out.print("Booking ID: ");
                         int bookingId15 = Integer.parseInt(scanner.nextLine());
                         bookingService.cancelBookingByAgent(conn, email15, bookingId15);
+                    }
+
+                    case 16 -> {
+                        System.out.println("=== Property Search ===");
+                        System.out.print("City (or leave blank): ");
+                        String city = scanner.nextLine();
+
+                        System.out.print("State (or leave blank): ");
+                        String state = scanner.nextLine();
+
+                        System.out.print("Min price (or leave blank): ");
+                        String minPriceInput = scanner.nextLine();
+                        Double minPrice = minPriceInput.isEmpty() ? null : Double.parseDouble(minPriceInput);
+
+                        System.out.print("Max price (or leave blank): ");
+                        String maxPriceInput = scanner.nextLine();
+                        Double maxPrice = maxPriceInput.isEmpty() ? null : Double.parseDouble(maxPriceInput);
+
+                        System.out.print("Property type (apartment, house, etc. or leave blank): ");
+                        String type = scanner.nextLine();
+
+                        System.out.print("Order by (price or bedrooms): ");
+                        String orderBy = scanner.nextLine();
+
+                        propertyService.searchProperties(conn, city, state, minPrice, maxPrice, type, null, orderBy);
+                        
                     }
 
                     case 0 -> {
