@@ -51,11 +51,11 @@ INSERT INTO users_cc (card_number, email_address) VALUES
   ('3530111333300000','renter4@example.com');
 
 -- 7) Billing addresses for cards
-INSERT INTO credit_card_address (address_id, card_number) VALUES
-  (1, '4111111111111111'),
-  (2, '5500000000000004'),
-  (3, '6011000990139424'),
-  (4, '3530111333300000');
+INSERT INTO credit_card_address (card_number, address_id) VALUES
+  ('4111111111111111', 1),
+  ('5500000000000004', 2),
+  ('6011000990139424', 3),
+  ('3530111333300000', 4);
 
 -- 8) Residential addresses for renters
 INSERT INTO renter_address (address_id, email_address) VALUES

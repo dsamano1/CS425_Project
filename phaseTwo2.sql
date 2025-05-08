@@ -42,8 +42,8 @@ CREATE TABLE users_cc (
 );
  
 CREATE TABLE credit_card_address (
-   address_id INTEGER,
    card_number VARCHAR(20) PRIMARY KEY,
+   address_id INTEGER NOT NULL,
    FOREIGN KEY (card_number) REFERENCES credit_card(card_number),
    FOREIGN KEY (address_id) REFERENCES Address(address_id)
 );
