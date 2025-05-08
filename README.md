@@ -102,17 +102,36 @@ A Java-based command-line application backed by PostgreSQL that supports user re
 
 ## ✅ Getting Started
 
-1. Compile:  
-   ```bash
-   javac -cp ".:postgresql-42.7.3.jar" *.java   ```
+1. Make sure PostgreSQL is running.
 
-2. Run:
+2. Access your PostgreSQL binary path
+   ```bash
+   export PATH=$PATH:/Library/PostgreSQL/17(or modify for yours)/bin
+   ```
+
+3. Create the databse for the application mydb by running these commands line by line in the terminal :
+   ```bash
+   psql -U postgres
+   DROP DATABASE IF EXISTS mydb;
+   CREATE DATABASE mydb;
+   \q
+   ```
+
+4. Load the schema and the fake data sql files (line by line):
+   ```bash
+   psql -U postgres -d mydb -f phaseTwo2.sql
+   psql -U postgres -d mydb -f fake_data.sql
+   ```
+
+5. Compile:  
+   ```bash
+   javac -cp ".:postgresql-42.7.3.jar" *.java 
+   ```
+
+6. Run:
    ```bash
    java -cp ".:postgresql-42.7.3.jar" Main
    ```
-
-3. Make sure PostgreSQL is running and your database (`mydb`) has the schema loaded.
-
 ---
 
 ## 🚀 Use Cases
