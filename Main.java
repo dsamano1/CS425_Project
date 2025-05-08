@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
@@ -236,28 +237,47 @@ public class Main {
                     }
 
                     case 16 -> {
-                        System.out.println("=== Property Search ===");
-                        System.out.print("City (or leave blank): ");
-                        String city = scanner.nextLine();
+                        // ——— Required filters ———
+                        System.out.print("City (or blank for any): ");
+                        String city = scanner.nextLine().trim();
+                        System.out.print("State (or blank for any): ");
+                        String state = scanner.nextLine().trim();
+                        if (city.isEmpty() && state.isEmpty()) {
+                            System.out.println("You must specify at least a city or a state.");
+                            break;
+                        }
+                    
+                        System.out.print("Available on date (YYYY-MM-DD): ");
+                        String ds = scanner.nextLine().trim();
+                        if (ds.isEmpty()) {
+                            System.out.println("You must enter a date for availability.");
+                            break;
+                        }
+                        LocalDate desiredDate = LocalDate.parse(ds);
+                    
+                        // ——— Optional filters ———
+                        System.out.print("Min bedrooms (or blank): ");
+                        String bd = scanner.nextLine().trim();
+                        Integer minBedrooms = bd.isEmpty() ? null : Integer.parseInt(bd);
 
-                        System.out.print("State (or leave blank): ");
-                        String state = scanner.nextLine();
+                        System.out.print("Min price (or blank): ");
+                        String minP = scanner.nextLine().trim();
+                        Double minPrice = minP.isEmpty() ? null : Double.parseDouble(minP);
 
-                        System.out.print("Min price (or leave blank): ");
-                        String minPriceInput = scanner.nextLine();
-                        Double minPrice = minPriceInput.isEmpty() ? null : Double.parseDouble(minPriceInput);
+                        System.out.print("Max price (or blank): ");
+                        String maxP = scanner.nextLine().trim();
+                        Double maxPrice = maxP.isEmpty() ? null : Double.parseDouble(maxP);
 
-                        System.out.print("Max price (or leave blank): ");
-                        String maxPriceInput = scanner.nextLine();
-                        Double maxPrice = maxPriceInput.isEmpty() ? null : Double.parseDouble(maxPriceInput);
+                        System.out.print("Property type (e.g. Apartment, House; blank for any): ");
+                        String type = scanner.nextLine().trim();
+                        if (type.isEmpty()) type = null;
 
-                        System.out.print("Property type (apartment, house, etc. or leave blank): ");
-                        String type = scanner.nextLine();
+                        System.out.print("Order by (price|bedrooms): ");
+                        String orderBy = scanner.nextLine().trim().equalsIgnoreCase("bedrooms")
+                                         ? "bedrooms" : "price";
 
-                        System.out.print("Order by (price or bedrooms): ");
-                        String orderBy = scanner.nextLine();
-
-                        propertyService.searchProperties(conn, city, state, minPrice, maxPrice, type, null, orderBy);
+                        propertyService.searchProperties(conn, city.isEmpty() ? null : city, state.isEmpty() ? null : state, type, minBedrooms, minPrice, maxPrice, desiredDate, orderBy);
+                        break;
                         
                     }
 

@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.time.LocalDate;
 
 public class PropertyService {
 
@@ -55,56 +56,84 @@ public class PropertyService {
 
         System.out.println("✅ Property updated.");
     }
+    public void searchProperties(Connection conn,
+                             String city,
+                             String state,
+                             String type,
+                             Integer minBedrooms,
+                             Double minPrice,
+                             Double maxPrice,
+                             LocalDate desiredDate,  // now required
+                             String orderBy) throws SQLException {
 
-    public void searchProperties(Connection conn, String city, String state, Double minPrice, Double maxPrice, String type, Integer bedrooms, String orderBy) throws SQLException {
-        StringBuilder query = new StringBuilder("SELECT * FROM property WHERE 1=1");
+    StringBuilder sql = new StringBuilder("""
+        SELECT
+          p.property_id,
+          p.city,
+          p.state,
+          p.type,
+          p.square_footage,
+          p.price,
+          p.description,                             -- added
+          COALESCE(a.number_of_rooms, h.number_of_rooms) AS bedrooms
+        FROM property p
+        LEFT JOIN apartments a ON p.property_id = a.property_id
+        LEFT JOIN houses h     ON p.property_id = h.property_id
+        WHERE 1=1
+        """);
 
-        if (city != null && !city.isEmpty()) {
-            query.append(" AND LOWER(city) = LOWER(?)");
-        }
-        if (state != null && !state.isEmpty()) {
-            query.append(" AND LOWER(state) = LOWER(?)");
-        }
-        if (minPrice != null) {
-            query.append(" AND price >= ?");
-        }
-        if (maxPrice != null) {
-            query.append(" AND price <= ?");
-        }
-        if (type != null && !type.isEmpty()) {
-            query.append(" AND LOWER(type) = LOWER(?)");
-        }
-        if ("price".equals(orderBy)) {
-            query.append(" ORDER BY price ASC");
-        } else if ("bedrooms".equals(orderBy)) {
-            query.append(" ORDER BY bedrooms ASC");
-        }
+    if (city     != null)     sql.append(" AND LOWER(p.city)=LOWER(?)");
+    if (state    != null)     sql.append(" AND LOWER(p.state)=LOWER(?)");
+    if (type     != null)     sql.append(" AND LOWER(p.type)=LOWER(?)");
+    if (minPrice != null)     sql.append(" AND p.price >= ?");
+    if (maxPrice != null)     sql.append(" AND p.price <= ?");
+    if (minBedrooms != null)  sql.append(" AND COALESCE(a.number_of_rooms, h.number_of_rooms) >= ?");
+    
+    // date-availability filter
+    sql.append("""
+      AND NOT EXISTS (
+        SELECT 1 FROM booking b
+         WHERE b.property_id = p.property_id
+           AND NOT (b.end_date   < ?
+                 OR b.start_date > ?)
+      )
+    """);
 
-        PreparedStatement stmt = conn.prepareStatement(query.toString());
+    // ordering
+    if (orderBy.equals("bedrooms")) sql.append(" ORDER BY bedrooms ASC");
+    else                            sql.append(" ORDER BY p.price ASC");
 
-        int i = 1;
-        if (city != null && !city.isEmpty()) stmt.setString(i++, city);
-        if (state != null && !state.isEmpty()) stmt.setString(i++, state);
-        if (minPrice != null) stmt.setDouble(i++, minPrice);
-        if (maxPrice != null) stmt.setDouble(i++, maxPrice);
-        if (type != null && !type.isEmpty()) stmt.setString(i++, type);
+    try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        int idx = 1;
+        if (city      != null) ps.setString(idx++, city);
+        if (state     != null) ps.setString(idx++, state);
+        if (type      != null) ps.setString(idx++, type);
+        if (minPrice  != null) ps.setDouble(idx++, minPrice);
+        if (maxPrice  != null) ps.setDouble(idx++, maxPrice);
+        if (minBedrooms != null) ps.setInt(idx++, minBedrooms);
+        // bind the desiredDate twice for the NOT EXISTS subquery
+        ps.setDate(idx++, Date.valueOf(desiredDate));
+        ps.setDate(idx++, Date.valueOf(desiredDate));
 
-        ResultSet rs = stmt.executeQuery();
-
+        ResultSet rs = ps.executeQuery();
+        System.out.printf(
+          "%-4s %-10s %-6s %-10s %-6s %-8s %-8s %-30s%n",
+          "ID", "City", "State", "Type", "SqFt", "Price", "Beds", "Description"
+        );
         while (rs.next()) {
-            int id = rs.getInt("property_id");  
-            String t = rs.getString("type");
-            double sqft = rs.getDouble("square_footage");
-            String addr = rs.getString("address");
-            String c = rs.getString("city");
-            String s = rs.getString("state");
-            double price = rs.getDouble("price");
-            String desc = rs.getString("description");
-
-            System.out.printf("🏠 ID: %d | %s | %.0f sqft | $%.2f | %s, %s | %s | %s\n",
-                            id, t, sqft, price, addr, c, s, desc);
+            System.out.printf(
+              "%-4d %-10s %-6s %-10s %-6d $%-7.2f %-8d %-30s%n",
+              rs.getInt("property_id"),
+              rs.getString("city"),
+              rs.getString("state"),
+              rs.getString("type"),
+              rs.getInt("square_footage"),
+              rs.getDouble("price"),
+              rs.getInt("bedrooms"),
+              rs.getString("description")
+            );
         }
-        System.out.println("✅ Property search completed.");
-
     }
+}
+
 }

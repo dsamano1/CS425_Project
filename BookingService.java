@@ -1,5 +1,7 @@
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class BookingService {
@@ -47,13 +49,38 @@ public class BookingService {
             long days = endDate.toEpochDay() - startDate.toEpochDay() + 1;
             double totalCost = price * days;
 
+             // renter’s credit cards 
+            PreparedStatement cardStmt = conn.prepareStatement(
+                "SELECT card_number FROM users_cc WHERE email_address = ?");
+            cardStmt.setString(1, renterEmail);
+            ResultSet rsCards = cardStmt.executeQuery();
+                    
+            List<String> cards = new ArrayList<>();
+            while (rsCards.next()) {
+                cards.add(rsCards.getString("card_number"));
+            }
+            if (cards.isEmpty()) {
+                System.out.println("You have no saved credit cards; please add one first.");
+                return;
+            }
+            
+            System.out.println("Select a credit card:");
+            for (int i = 0; i < cards.size(); i++) {
+                System.out.printf("  %d) %s%n", i + 1, cards.get(i));
+            }
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+            String selectedCard = cards.get(choice - 1);
+
+
             // insert booking
             PreparedStatement ins = conn.prepareStatement(
-              "INSERT INTO booking(renter_email, property_id, start_date, end_date) VALUES(?,?,?,?)");
+              "INSERT INTO booking(renter_email, card_number, property_id, start_date, end_date) VALUES(?,?,?,?,?)");
             ins.setString(1, renterEmail);
-            ins.setInt(2, propertyId);
-            ins.setDate(3, Date.valueOf(startDate));
-            ins.setDate(4, Date.valueOf(endDate));
+            ins.setString(2, selectedCard);
+            ins.setInt(3, propertyId);
+            ins.setDate(4, Date.valueOf(startDate));
+            ins.setDate(5, Date.valueOf(endDate));
             ins.executeUpdate();
 
             System.out.println("Booked! Total cost: $"+ totalCost);

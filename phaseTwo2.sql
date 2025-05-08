@@ -73,7 +73,8 @@ CREATE TABLE property (
    state           VARCHAR(100),
    availability    BOOLEAN      DEFAULT TRUE,
    price           DECIMAL(10,2),
-   description     TEXT
+   description     TEXT,
+   for_sale        BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE booking (

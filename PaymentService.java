@@ -40,7 +40,7 @@ public class PaymentService {
         cardStmt.executeUpdate();
 
         PreparedStatement userLink = conn.prepareStatement(
-            "INSERT INTO user_cc (card_number, email_address) VALUES (?, ?)");
+            "INSERT INTO users_cc (card_number, email_address) VALUES (?, ?)");
         userLink.setString(1, cardNum);
         userLink.setString(2, email);
         userLink.executeUpdate();
@@ -59,7 +59,7 @@ public class PaymentService {
         delBilling.setString(1, cardNum);
         delBilling.executeUpdate();
 
-        PreparedStatement delLink = conn.prepareStatement("DELETE FROM user_cc WHERE card_number = ?");
+        PreparedStatement delLink = conn.prepareStatement("DELETE FROM users_cc WHERE card_number = ?");
         delLink.setString(1, cardNum);
         delLink.executeUpdate();
 
